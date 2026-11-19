@@ -1,0 +1,79 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
+// 排序前 6 個號碼（由小到大）
+void sort_six(int arr[]) {
+    for (int i = 0; i < 5; i++) {
+        for (int j = 0; j < 5 - i; j++) {
+            if (arr[j] > arr[j + 1]) {
+                int temp = arr[j];
+                arr[j] = arr[j + 1];
+                arr[j + 1] = temp;
+            }
+        }
+    }
+}
+
+// 產生一組 7 個不重複的樂透號碼 (01 ~ 69)
+void generate_lotto(int lotto[]) {
+    int used[70] = {0};
+    int count = 0;
+    while (count < 7) {
+        int num = rand() % 69 + 1;
+        if (!used[num]) {
+            used[num] = 1;
+            lotto[count++] = num;
+        }
+    }
+    sort_six(lotto); // 前 6 個號碼排序，第 7 個保留為特別號
+}
+
+int main() {
+    int n;
+    printf("歡迎光臨長庚樂透購買機台\n");
+    printf("請問您要買幾組樂透彩：");
+    scanf("%d", &n);
+
+    if (n < 1 || n > 5) {
+        printf("輸入組數請介於 1 到 5 之間！\n");
+        return 1;
+    }
+
+    FILE *fp = fopen("lotto.txt", "w");
+    if (fp == NULL) {
+        printf("無法開啟檔案 lotto.txt\n");
+        return 1;
+    }
+
+    // 取得目前時間並移除 ctime 尾端的換行符號
+    time_t now = time(NULL);
+    char *time_str = ctime(&now);
+    time_str[strcspn(time_str, "\n")] = '\0';
+
+    srand((unsigned int)now);
+
+    fprintf(fp, "========= lotto649 =========\n");
+    fprintf(fp, "= %s =\n", time_str);
+
+    for (int i = 0; i < 5; i++) {
+        fprintf(fp, "[%d]:", i + 1);
+        if (i < n) {
+            int lotto[7];
+            generate_lotto(lotto);
+            for (int j = 0; j < 7; j++) {
+                fprintf(fp, " %02d", lotto[j]);
+            }
+            fprintf(fp, "\n");
+        } else {
+            fprintf(fp, " -- -- -- -- -- -- --\n");
+        }
+    }
+
+    fprintf(fp, "========= csie@CGU =========\n");
+    fclose(fp);
+
+    printf("以為您購買的 %d 組樂透組合輸出至 lotto.txt\n", n);
+    return 0;
+}
