@@ -1,0 +1,60 @@
+#include <stdio.h>
+#include <string.h>
+
+// 定義書籍結構[cite: 2, 3]
+typedef struct Books {
+    int id;
+    int price;
+    char title[100];
+} book_t;
+
+// 計算所有書籍的總價錢[cite: 1, 2]
+void total_price(book_t books[], int n) {
+    int sum = 0;
+    for (int i = 0; i < n; i++) {
+        sum += books[i].price;
+    }
+    printf("Total price: %d\n", sum);
+}
+
+// 輸出所有書籍資料至螢幕[cite: 1, 2]
+void list_books(book_t books[], int n) {
+    for (int i = 0; i < n; i++) {
+        printf("%d\t%d\t%s\n", books[i].id, books[i].price, books[i].title);
+    }
+}
+
+int main() {
+    // 1. 在 main 中建立書籍資料[cite: 2, 3]
+    book_t books[6] = {
+        {1, 1000, "All the Light We Cannot See"},
+        {2, 300, "The 38 Letters from J.D. Rockefeller to his son"},
+        {3, 1000, "The Ballad of Songbirds and Snakes"},
+        {4, 550, "Killers of the Flower Moon"},
+        {5, 870, "Elon Musk"},
+        {6, 1344, "Milk and Honey 12-Month 2024"}
+    };
+
+    int n = sizeof(books) / sizeof(books[0]);
+
+    // 2. 將書籍資料寫入二進位檔案 Book.bin
+    FILE *fp = fopen("Book.bin", "wb+");
+    if (fp == NULL) {
+        printf("無法開啟檔案 Book.bin\n");
+        return 1;
+    }
+    fwrite(books, sizeof(book_t), n, fp);
+
+    // 3. 將檔案指標移回開頭並讀取資料驗證（確保檔案寫入成功）
+    book_t read_books[6];
+    fseek(fp, 0, SEEK_SET);
+    fread(read_books, sizeof(book_t), n, fp);
+    fclose(fp);
+
+    // 4. 透過函式計算總價並輸出書籍清單[cite: 2]
+    total_price(read_books, n);
+    printf("\n");
+    list_books(read_books, n);
+
+    return 0;
+}
